@@ -6,7 +6,7 @@ services:
     build: .
     image: server
     ports:
-        - "10000:10000"
+        - "5000:10000"
     environment:
       PEERS: 'node1,node2'
       ID: 0
@@ -14,7 +14,7 @@ services:
   node1:
     image: server
     ports:
-        - "10001:10000"
+        - "5001:10000"
     environment:
       PEERS: 'node0,node2'
       ID: 1
@@ -22,7 +22,7 @@ services:
   node2:
     image: server
     ports:
-        - "10002:10000"
+        - "5002:10000"
     environment:
       PEERS: 'node0,node1'
       ID: 2
