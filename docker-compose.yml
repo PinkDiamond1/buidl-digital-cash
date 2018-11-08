@@ -6,7 +6,7 @@ services:
     build: .
     image: blockcoin
     ports:
-        - "10000:10000"
+        - "5000:5000"
     environment:
       PEERS: 'node1,node2'
       BANK_ID: 0
@@ -14,7 +14,7 @@ services:
   node1:
     image: blockcoin
     ports:
-        - "10001:10000"
+        - "5001:5000"
     environment:
       PEERS: 'node0,node2'
       BANK_ID: 1
@@ -22,7 +22,7 @@ services:
   node2:
     image: blockcoin
     ports:
-        - "10002:10000"
+        - "5002:5000"
     environment:
       PEERS: 'node0,node1'
       BANK_ID: 2
