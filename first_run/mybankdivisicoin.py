@@ -4,7 +4,7 @@ from uuid import uuid4
 class Tx:
 
     def __init__(self, id, tx_ins, tx_outs):
-        self.id = id
+        self.id = id,
         self.tx_ins = tx_ins
         self.tx_outs = tx_outs
 
@@ -14,17 +14,17 @@ class Tx:
         self.tx_ins[index].signature = signature
 
 class TxIn:
-    
+
     def __init__(self, tx_id, index, signature):
         self.tx_id = tx_id
         self.index = index
         self.signature = signature
 
     def spend_message(self):
-        return f"{self.tx_id}.{self.index}".encode()
+        return f"{self.tx_id}:{self.index}".encode()
 
 class TxOut:
-    
+
     def __init__(self, tx_id, index, amount, public_key):
         self.tx_id = tx_id
         self.index = index
@@ -32,16 +32,19 @@ class TxOut:
         self.public_key = public_key
 
 class Bank:
-    
+
     def __init__(self):
         self.txs = {}
 
     def issue(self, amount, public_key):
+    
         id = uuid4()
         tx_ins = []
+
         tx_outs = [
-            TxOut(tx_id=id, index=0, amount=amount, public_key=public_key)
+          TxOut(tx_id=id, index=0, amount=amount, public_key=public_key)
         ]
+
         tx = Tx(id=id, tx_ins=tx_ins, tx_outs=tx_outs)
         self.txs[tx.id] = tx
         return tx
@@ -71,6 +74,7 @@ class Bank:
             out_sum += tx_out.amount
 
         assert in_sum == out_sum
+        
 
     def handle_tx(self, tx):
         self.validate_tx(tx)
@@ -86,7 +90,7 @@ class Bank:
                    for i, tx_out in enumerate(tx.tx_outs)
                        if public_key.to_string() == tx_out.public_key.to_string()
                        and (tx.id, i) not in spent_pairs]
-                       
+
     def fetch_balance(self, public_key):
         utxo = self.fetch_utxo(public_key)
         return sum([tx_out.amount for tx_out in utxo])

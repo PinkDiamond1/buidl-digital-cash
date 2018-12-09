@@ -45,7 +45,7 @@ class TxOut:
 class Bank:
 
     def __init__(self):
-        # (tx_id, index) -> tx_out
+        # (tx.id, index) -> tx_out
         self.utxo = {}
 
     def update_utxo(self, tx):
