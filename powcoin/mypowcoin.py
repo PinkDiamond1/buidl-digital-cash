@@ -98,6 +98,9 @@ class Block:
     def proof(self):
         return int(self.id, 16)
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     def __repr__(self):
         return f"Block(prev_id={self.prev_id[:10]}... id={self.id[:10]}...)"
 
@@ -200,11 +203,23 @@ class Node:
             for tx in block.txns[1:]:
                 self.validate_tx(tx)
 
+    def find_in_branch(self, block_id):
+        for branch_index, branch in enumerate(self.branches):
+            for height, block in enumerate(branch):
+                if block.id == block_id:
+                    return branch, branch_index, height
+        return None, None, None
+
     def handle_block(self, block):
+        # Look up previous block
+        branch, branch_index, height = self.find_in_branch(block.prev_id)
+
         # Conditions
         extends_chain = block.prev_id == self.blocks[-1].id
         forks_chain = not extends_chain and \
                 block.prev_id in [block.id for block in self.blocks]
+        extends_branch = branch and height == len(branch) - 1
+        forks_branch = branch and height != len(branch) - 1
         
         # Always validate, but only validate transactions if extending chain
         self.validate_block(block, validate_txns=extends_chain)
@@ -215,7 +230,14 @@ class Node:
             logger.info(f"Extended chain to height {len(self.blocks) - 1}")
         elif forks_chain:
             self.branches.append([block])
-            logger.info(f"Created branch {len(self.branches)}")
+            logger.info(f"Created branch {len(self.branches)-1}")
+        elif extends_branch:
+            branch.append(block)
+            # FIXME: reorg if this branch now has more work than the main chain
+            logger.info(f"Extended branch {branch_index} to {len(self.branches)-1}")
+        elif forks_branch:
+            self.branches.append(branch[:height+1] + [block])
+            logger.info(f"Created branch {len(self.branches)-1} to height {len(self.branches[-1])-1}")
         else:
             raise Exception("Couldn't locate parent block")
 
